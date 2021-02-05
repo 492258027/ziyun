@@ -1,0 +1,60 @@
+-------------------------oauth2认证---------------------------
+A是第三方网站， B是微信, 采用授权码方式
+
+第一次交互（申请授权码）
+第一步，A 网站提供一个链接，用户点击后就会跳转到 B 网站，授权用户数据给 A 网站使用
+https://b.com/oauth/authorize?
+  response_type=code&
+  client_id=CLIENT_ID&
+  redirect_uri=CALLBACK_URL&
+  scope=read
+
+ response_type参数表示要求返回授权码（code），
+ client_id参数让 B 知道是谁在请求，
+ redirect_uri参数是 B 接受或拒绝请求后的跳转网址，
+ scope参数表示要求的授权范围（这里是只读）。
+ state透明的验证参数，也就是说用于让第三方服务器验证重定向回来的uri的确是认证服务器的行为而不是其他的攻击者伪造的。
+ 一般来说跳转到认证服务器的授权页面是走的https，但是认证服务器重定向到回调地址的时候可能走的就是http。
+ 此时code存在泄漏以及url存在被伪造的风险。那么第三方应用必须要有办法验证该回调是否的确由认证服务器发起，
+ 并且的确是之前自己的授权请求导致的回调，说白了就是B原样返回
+
+第二步，用户跳转后，B 网站会要求用户登录，然后询问是否同意给予 A 网站授权。用户表示同意，
+这时 B 网站就会跳回redirect_uri参数指定的网址，跳转时，会传回一个授权码，就像下面这样。
+https://a.com/callback?code=AUTHORIZATION_CODE
+code参数就是授权码，该code的时效性应该比较短，在5分钟以内比较合适， 并且该code只能使用一次，下次就会失效。
+该code与客户端的id，redirect-uri参数是一一对应的关系，同时，当用户点击同意授权的时候，也会记录下用户id和code之间的关系。
+也就是说code，唯一对应于appid， 用户id(openid)， redirect-uri， 时间。说白了， 在一定时间外，用户每次同意授权的动作对应于一个code。
+
+第二次交互（申请token）
+
+第三步，A 网站拿到授权码以后，就可以在后端，向 B 网站请求令牌。
+https://b.com/oauth/token?
+ client_id=CLIENT_ID&
+ client_secret=CLIENT_SECRET&
+ grant_type=authorization_code&
+ code=AUTHORIZATION_CODE&
+ redirect_uri=CALLBACK_URL
+client_id参数和client_secret参数用来让 B 确认 A 的身份（client_secret参数是保密的，因此只能在后端发请求），
+grant_type参数的值是AUTHORIZATION_CODE，表示采用的授权方式是授权码，
+code参数是上一步拿到的授权码，
+redirect_uri参数是令牌颁发后的回调网址。
+一般来说， 完整的第三方应用凭证是appkey和appsecret的组合，其中appkey用来标识第三方应用， appsecret用进行安全加密。
+
+
+第四步，B 网站收到请求以后，就会颁发令牌。具体做法是向redirect_uri指定的网址，发送一段 JSON 数据。
+{
+  "access_token":"ACCESS_TOKEN",
+  "token_type":"bearer",
+  "expires_in":2592000,
+  "refresh_token":"REFRESH_TOKEN",
+  "scope":"read",
+  "uid":100101,
+  "info":{...}
+}
+上面 JSON 数据中，access_token字段就是令牌，A 网站在后端拿到之后通过token和openid，去访问B网站
+
+在 OAuth 2 服务提供平台新建一个应用之后，平台会提供一对客户端ID和密码作为客户端凭证。
+客户端 ID 是可以公开的字符串，用以构建授权请求链接；
+用户授权之后, A使用B返回的的授权码和平台为A分配的密码获取 access token 。
+密码应当妥善保管以免泄漏。
+

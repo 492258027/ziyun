@@ -1,0 +1,20 @@
+#http服务运行地址和端口
+#在docker和k8s中运行的情况下，host不填写
+http:
+  #host:
+  host: 192.168.73.3
+  port: 5250
+
+#rpc服务运行地址和端口
+#在docker和k8s中运行的情况下，host不填写
+rpc:
+  host: 192.168.73.3
+  port: 5240
+
+#consul的地址和端口
+#注册到consul上的实例ID和微服务名
+consul:
+  host: 192.168.73.3
+  port: 8500
+  instanceId:
+  serviceName: opstring

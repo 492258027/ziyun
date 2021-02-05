@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth 
+    spec:
+      containers:
+      - name: auth 
+        image: registry.cn-beijing.aliyuncs.com/492258027/ziyun/auth:v5.0
+        ports:
+        - name: http
+          containerPort: 5150
+        - name: rpc 
+          containerPort: 5140
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+          - name: bootstrap
+            mountPath: /app/bootstrap
+      volumes:
+      - name: bootstrap
+        configMap:
+          name: auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 5150
+    targetPort: 5150
+    nodePort: 30150
+  - name: rpc
+    port: 5140
+    targetPort: 5140
+    nodePort: 30140
+  selector:
+    app: auth
+

@@ -1,0 +1,17 @@
+------------------------  go mod  --------------------------
+设置环境变量， 如果是本机IDE， 设置goland的环境变量就可以， 不用设置机器的环境变量
+go env -w GO111MODULE=on
+go env -w GOPROXY=https://goproxy.cn,direct/
+
+GOPATH 不是真的不要了 ，只需要配置一个路径，用来存放下载的包
+$GOPATH\src 是用 go get 下载 的包。
+$GOPATH\pkg\mod 是 go modules 下载的包。
+
+一个工程建立一个mod文件即可
+进入工程目录， 执行： go mod init hamster
+
+工程中引用的子文件夹路径写到工程名："hamster/driver/imhbase"
+
+go mod tidy 检查相关依赖
+
+go build 编译

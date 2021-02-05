@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gateway 
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+      - name: gateway 
+        image: registry.cn-beijing.aliyuncs.com/492258027/ziyun/gateway:v8.0
+        ports:
+        - name: http
+          containerPort: 5050
+        - name: rpc 
+          containerPort: 5040
+        - name: hystrix
+          containerPort: 6000
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+          - name: bootstrap
+            mountPath: /app/bootstrap
+          - name: kit-logs
+            mountPath: /app/logs
+      volumes:
+        - name: bootstrap
+          configMap:
+            name: gateway
+        - name: kit-logs
+          persistentVolumeClaim:
+            claimName: kit-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway 
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 5050
+    targetPort: 5050
+    nodePort: 30050
+  - name: rpc
+    port: 5040
+    targetPort: 5040
+    nodePort: 30040
+  - name: hystrix 
+    port: 6000 
+    targetPort: 6000 
+    nodePort: 30060
+  selector:
+    app: gateway
+

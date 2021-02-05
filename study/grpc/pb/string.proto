@@ -1,0 +1,21 @@
+//指定proto3版本，默认是proto2
+syntax = "proto3";
+
+//指定包名
+package pb;
+
+//定义服务接口
+service String{
+    rpc Concat(StringRequest) returns (StringResponse) {}
+    rpc Diff(StringRequest) returns (StringResponse) {}
+}
+
+//定义类型
+message StringRequest {
+    string A = 1;
+    string B = 2;
+}
+
+message StringResponse {
+    string Result = 1;
+}

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: consul
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consul
+  template:
+    metadata:
+      labels:
+        app: consul
+    spec:
+      containers:
+      - name: consul
+        image: consul:latest
+        args:
+             - "agent"
+             - "-server"
+             - "-bootstrap"
+             - "-ui"
+             - "-bind=0.0.0.0"
+             - "-client=0.0.0.0"
+        ports:
+            - containerPort: 8300
+              name: server
+            - containerPort: 8301
+              name: serflan
+            - containerPort: 8302
+              name: serfwan
+            - containerPort: 8500
+              name: ui-port
+            - containerPort: 8600
+              name: consuldns
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 8500
+    nodePort: 31002
+  selector:
+    app: consul

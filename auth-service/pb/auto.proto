@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package auth;
+
+import "github.com/metaverse/truss/deftree/googlethirdparty/annotations.proto";
+
+service Auth {
+
+  rpc Health (HealthRequest) returns (HealthResponse) {
+    option (google.api.http) = {
+      // All fields (In) are query parameters of the http request unless otherwise specified
+      get: "/health"
+
+      additional_bindings {
+        // Trailing slashes are different routes
+        get: "/health/"
+      }
+    };
+  }
+
+  rpc Auth (AuthRequest) returns (AuthResponse) {
+    option (google.api.http) = {
+      post: "/auth/{Type}"
+      body: "*"
+    };
+  }
+}
+
+message HealthRequest {
+}
+
+message HealthResponse {
+  bool Status = 1;
+}
+
+message AuthRequest {
+  string Type = 1;
+  string CompanyID = 2;
+  string UserID = 3;
+  string UserName = 4;
+  string Passwd = 5;
+  string AToken = 6;
+  string RToken = 7;
+}
+
+message AuthResponse {
+  string Type = 1;
+  string UserID = 2;
+  string AToken = 3;
+  string RToken = 4;
+  string valid = 5;
+}

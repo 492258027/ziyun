@@ -1,0 +1,199 @@
+version: '3'
+
+services:
+#  prometheus:
+#    image: prom/prometheus
+#    ports:
+#      - 9090:9090
+#    volumes:
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#  grafana:
+#    image: grafana/grafana
+#    ports:
+#      - 3000:3000
+#    environment:
+#      - GF_SECURITY_ADMIN_PASSWORD=password
+#    volumes:
+#      - $PWD/extra/grafana_db:/var/lib/grafana grafana/grafana
+
+  zipkin:
+    container_name: zipkin
+    restart: always
+    network_mode: bridge
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+
+  hystrix-dashboard:
+    container_name: hystrix-dashboard
+    restart: always
+    network_mode: bridge
+    image: mlabouardy/hystrix-dashboard:latest
+    ports:
+      - 9002:9002
+
+  consul:
+    container_name: consul
+    restart: always
+    network_mode: bridge
+    image: consul:latest
+    ports:
+      - 8300:8300
+      - 8301:8301
+      - 8302:8302
+      - 8500:8500
+      - 8600:8600
+    command: agent -server -bootstrap -ui -bind=0.0.0.0 -client=0.0.0.0
+
+  #以下swagger相关。editor生成的json文件拷贝到宿主机的映射目录
+  swagger-editor:
+    container_name: swagger-editor
+    restart: always
+    network_mode: bridge
+    image: swaggerapi/swagger-editor
+    ports:
+      - 9999:8080
+
+  swagger-ui:
+    container_name: swagger-ui
+    restart: always
+    network_mode: bridge
+    image: swaggerapi/swagger-ui
+    ports:
+      - 10000:8080
+    volumes:
+      - /data/swagger:/foo
+    environment:
+      - SWAGGER_JSON=/foo/swagger.json
+
+  #以下rabbitmq相关。需要映射宿主机数据文件目录
+  rabbitmq:
+    container_name: rabbitmq
+    restart: always
+    network_mode: bridge
+    image: rabbitmq:3.8.3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    volumes:
+      - /data/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
+
+  #以下fastdfs相关。
+  #docker run -di --network=host --name tracker -v /data/fastdfs/tracker:/var/fdfs  docker.io/delron/fastdfs tracker
+  #docker run -di --network=host --name storage -v /data/fastdfs/storage:/var/fdfs -e TRACKER_SERVER=192.168.3.7:22122  -e GROUP_NAME=group1 docker.io/delron/fastdfs storage
+  #采用的host模式，占用主机三个端口: tracker:22122, storage:23000, nginx:8888
+  #对应的配置文件分别在: /etc/fdfs/tracker.conf, /etc/fdfs/storage.conf, /usr/local/nginx/conf/nginx.conf
+  #没映射配置文件，如配置项需要修改，docker restart name
+  #测试： /usr/bin/fdfs_upload_file /etc/fdfs/client.conf test.png
+  #需要修改TRACKER_SERVER的值
+
+  tracker:
+    container_name: tracker
+    image: docker.io/delron/fastdfs
+    network_mode: "host"
+    command: tracker
+    volumes:
+      - /data/fastdfs/tracker:/var/fdfs
+    privileged: true
+    restart: always
+
+  storage:
+    container_name: storage
+    image: docker.io/delron/fastdfs
+    network_mode: "host"
+    command: storage
+    volumes:
+      - /data/fastdfs/storage:/var/fdfs
+    privileged: true
+    environment:
+      - TRACKER_SERVER=192.168.73.3:22122
+      - GROUP_NAME=group1
+    restart: always
+
+  #以下redis相关。需要映射宿主机数据文件和配置文件目录
+  master-1:
+    container_name: redis_6379
+    image: redis:6.0.6
+    network_mode: "host"
+    command: redis-server /etc/redis.conf
+    volumes:
+      - /data/redis_data/redis_6379/data:/data
+      - /data/redis_data/redis_6379/redis.conf:/etc/redis.conf
+    privileged: true
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+    restart: always
+
+  master-2:
+      container_name: redis_6380
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6380/data:/data
+        - /data/redis_data/redis_6380/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always
+
+  master-3:
+      container_name: redis_6381
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6381/data:/data
+        - /data/redis_data/redis_6381/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always
+
+  slave-1:
+      container_name: redis_6382
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6382/data:/data
+        - /data/redis_data/redis_6382/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always
+
+  slave-2:
+      container_name: redis_6383
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6383/data:/data
+        - /data/redis_data/redis_6383/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always
+
+  slave-3:
+      container_name: redis_6384
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6384/data:/data
+        - /data/redis_data/redis_6384/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always

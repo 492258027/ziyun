@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opstring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: opstring
+  template:
+    metadata:
+      labels:
+        app: opstring
+    spec:
+      containers:
+      - name: opstring 
+        image: registry.cn-beijing.aliyuncs.com/492258027/ziyun/opstring:v5.0
+        ports:
+        - name: http
+          containerPort: 5250
+        - name: rpc 
+          containerPort: 5240
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+          - name: bootstrap
+            mountPath: /app/bootstrap
+      volumes:
+        - name: bootstrap
+          configMap:
+            name: opstring
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opstring
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 5250
+    targetPort: 5250
+    nodePort: 30250
+  - name: rpc
+    port: 5240
+    targetPort: 5240
+    nodePort: 30240
+  selector:
+    app: opstring
+

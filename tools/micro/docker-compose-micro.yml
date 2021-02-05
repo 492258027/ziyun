@@ -1,0 +1,82 @@
+version: '3'
+
+services:
+#  prometheus:
+#    image: prom/prometheus
+#    ports:
+#      - 9090:9090
+#    volumes:
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#  grafana:
+#    image: grafana/grafana
+#    ports:
+#      - 3000:3000
+#    environment:
+#      - GF_SECURITY_ADMIN_PASSWORD=password
+#    volumes:
+#      - $PWD/extra/grafana_db:/var/lib/grafana grafana/grafana
+
+  zipkin:
+    container_name: zipkin
+    restart: always
+    network_mode: bridge
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+
+  hystrix-dashboard:
+    container_name: hystrix-dashboard
+    restart: always
+    network_mode: bridge
+    image: mlabouardy/hystrix-dashboard:latest
+    ports:
+      - 9002:9002
+
+  consul:
+    container_name: consul
+    restart: always
+    network_mode: bridge
+    image: consul:latest
+    ports:
+      - 8300:8300
+      - 8301:8301
+      - 8302:8302
+      - 8500:8500
+      - 8600:8600
+    command: agent -server -bootstrap -ui -bind=0.0.0.0 -client=0.0.0.0
+
+  #以下swagger相关。editor生成的json文件拷贝到宿主机的映射目录
+  swagger-editor:
+    container_name: swagger-editor
+    restart: always
+    network_mode: bridge
+    image: swaggerapi/swagger-editor
+    ports:
+      - 9999:8080
+
+  swagger-ui:
+    container_name: swagger-ui
+    restart: always
+    network_mode: bridge
+    image: swaggerapi/swagger-ui
+    ports:
+      - 10000:8080
+    volumes:
+      - /data/swagger:/foo
+    environment:
+      - SWAGGER_JSON=/foo/swagger.json
+
+  #以下rabbitmq相关。需要映射宿主机数据文件目录
+  rabbitmq:
+    container_name: rabbitmq
+    restart: always
+    network_mode: bridge
+    image: rabbitmq:3.8.3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    volumes:
+      - /data/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root

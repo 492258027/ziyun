@@ -1,0 +1,27 @@
+gprc的安装与使用
+
+1 下载包
+go get -u google.golang.org/grpc
+
+2 安装protoc插件
+ https://github.com/protocolbuffers/protobuf/releases
+ 下载 protoc-3.13.0-linux-x86_64.zip并解压，然后把bin目录下的protoc复制到GOPATH/bin下
+
+3 安装protoc-gen-go插件
+go get github.com/golang/protobuf/protoc-gen-go
+
+4 编写.proto文件
+
+5 生成Go语言代码
+//格式
+protoc  --go_out=output_directory  [-I=IMPORT_PATH]  input_directory/file.proto
+
+protoc  --go_out=plugins=grpc:. pb/string.proto
+
+6 使用
+//大体逻辑如下:
+// pb.go根据我们在proto声明的service，生成接口。
+// pb.go根据我们在proto声明的message，生成对象，及对象的get，set操作
+// 我们在service中定义类来实现接口
+// 在server中 初始化service对象， 初始化grpc驱动， 然后把二者绑定并运行。
+// 在client中 初始化新的client对象， 通过对象.方法 远程访问

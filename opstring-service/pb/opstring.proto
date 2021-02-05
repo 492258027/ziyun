@@ -1,0 +1,51 @@
+// In general, while you can use proto2 (the current default protocol buffers
+// version), we recommend that you use proto3 with gRPC as it lets you use the
+// full range of gRPC-supported languages, as well as avoiding compatibility
+// issues with proto2 clients talking to proto3 servers and vice versa.
+syntax = "proto3";
+
+// The package name determines the name of the directories that truss creates
+// for `package operate;` truss will create the directory "operate-service".
+package opstring;
+
+import "github.com/metaverse/truss/deftree/googlethirdparty/annotations.proto";
+
+service Opstring {
+
+  rpc Health (HealthRequest) returns (HealthResponse) {
+    option (google.api.http) = {
+      // All fields (In) are query parameters of the http request unless otherwise specified
+      get: "/health"
+
+      additional_bindings {
+        // Trailing slashes are different routes
+        get: "/health/"
+      }
+    };
+  }
+
+  rpc Opstring (OpstringRequest) returns (OpstringResponse) {
+    option (google.api.http) = {
+      post: "/opstring/{Type}"
+      body: "*"
+    };
+  }
+}
+
+message HealthRequest {
+}
+
+message HealthResponse {
+  bool Status = 1;
+}
+
+message OpstringRequest {
+  string Type = 1;
+  string A = 2;
+  string B = 3;
+}
+
+message OpstringResponse {
+  string Out = 1;
+}
+

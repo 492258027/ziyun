@@ -1,0 +1,87 @@
+version: '3'
+
+services:
+  #以下redis相关。需要映射宿主机数据文件和配置文件目录
+  master-1:
+    container_name: redis_6379
+    image: redis:6.0.6
+    network_mode: "host"
+    command: redis-server /etc/redis.conf
+    volumes:
+      - /data/redis_data/redis_6379/data:/data
+      - /data/redis_data/redis_6379/redis.conf:/etc/redis.conf
+    privileged: true
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+    restart: always
+
+  master-2:
+      container_name: redis_6380
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6380/data:/data
+        - /data/redis_data/redis_6380/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always
+
+  master-3:
+      container_name: redis_6381
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6381/data:/data
+        - /data/redis_data/redis_6381/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always
+
+  slave-1:
+      container_name: redis_6382
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6382/data:/data
+        - /data/redis_data/redis_6382/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always
+
+  slave-2:
+      container_name: redis_6383
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6383/data:/data
+        - /data/redis_data/redis_6383/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always
+
+  slave-3:
+      container_name: redis_6384
+      image: redis:6.0.6
+      network_mode: "host"
+      command: redis-server /etc/redis.conf
+      volumes:
+        - /data/redis_data/redis_6384/data:/data
+        - /data/redis_data/redis_6384/redis.conf:/etc/redis.conf
+      privileged: true
+      environment:
+        - TZ=Asia/Shanghai
+        - LANG=en_US.UTF-8
+      restart: always

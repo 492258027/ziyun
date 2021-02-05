@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  #以下fastdfs相关。
+  #docker run -di --network=host --name tracker -v /data/fastdfs/tracker:/var/fdfs  docker.io/delron/fastdfs tracker
+  #docker run -di --network=host --name storage -v /data/fastdfs/storage:/var/fdfs -e TRACKER_SERVER=192.168.3.7:22122  -e GROUP_NAME=group1 docker.io/delron/fastdfs storage
+  #采用的host模式，占用主机三个端口: tracker:22122, storage:23000, nginx:8888
+  #对应的配置文件分别在: /etc/fdfs/tracker.conf, /etc/fdfs/storage.conf, /usr/local/nginx/conf/nginx.conf
+  #没映射配置文件，如配置项需要修改，docker restart name
+  #测试： /usr/bin/fdfs_upload_file /etc/fdfs/client.conf test.png
+  #需要修改TRACKER_SERVER的值
+
+  tracker:
+    container_name: tracker
+    image: docker.io/delron/fastdfs
+    network_mode: "host"
+    command: tracker
+    volumes:
+      - /data/fastdfs/tracker:/var/fdfs
+    privileged: true
+    restart: always
+
+  storage:
+    container_name: storage
+    image: docker.io/delron/fastdfs
+    network_mode: "host"
+    command: storage
+    volumes:
+      - /data/fastdfs/storage:/var/fdfs
+    privileged: true
+    environment:
+      - TRACKER_SERVER=192.168.73.3:22122
+      - GROUP_NAME=group1
+    restart: always

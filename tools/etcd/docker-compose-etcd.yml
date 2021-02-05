@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  #需要创建数据映射目录 mkdir -p /data/etcd-data
+  etcd:
+    image: registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.4.7
+    container_name: etcd
+    restart: always
+    network_mode: bridge 
+    command: etcd -name etcd --data-dir=/etcd-data -advertise-client-urls http://0.0.0.0:2379 -listen-client-urls http://0.0.0.0:2379 -listen-peer-urls http://0.0.0.0:2380
+    ports:
+      - 12379:2379
+      - 12380:2380
+    volumes:
+      - /data/etcd-data:/etcd-data
+
+  #etcdkeeper 弹出web界面后， 需要手工填写etcd的地址: 192.168.73.3:12379
+  etcdkeeper:
+    image: deltaprojects/etcdkeeper
+    container_name: etcdkeeper1
+    restart: always
+    network_mode: bridge
+    ports:
+      - 18080:8080
+
+
